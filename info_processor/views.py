@@ -58,8 +58,7 @@ def db_query(request):
         res[object['fields']['session_id']]=temp
 
     # Make res object into json and return
-    res = json.dumps(res)
-    return HttpResponse(res)
+    return HttpResponse(json.dumps(res))
 
     
 
