@@ -21,7 +21,19 @@ def add_info(request):
         if payloadCheck:
             return payloadCheck
 
-        return HttpResponse(payload)
+        # Create event from payload
+        t = event(
+            session_id=payload.get('session_id'),
+            category=payload.get('category'), 
+            name=payload.get('name'), 
+            meta_data=payload.get('data'), 
+            timestamp=payload.get('timestamp')
+        )
+
+        # Save to db
+        t.save()
+
+        return HttpResponse('Success: added record to database')
 
 
 def payloadChecker(payload):
@@ -46,3 +58,4 @@ def payloadChecker(payload):
         return HttpResponseBadRequest('Error: Wrong value type for timestamp')
 
     return False
+
