@@ -1,16 +1,16 @@
-from django.http.response import HttpResponseBadRequest, HttpResponseServerError
-from django.shortcuts import render
+from django.http.response import HttpResponseBadRequest
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import event
 from django.core import serializers
 import json
+import datetime
 
 @csrf_exempt
 def add_info(request):
         # If wrong method used, send back 400 error
         if request.method != 'POST':
-            return HttpResponseBadRequest('Error: incorrect method')
+            return HttpResponseBadRequest('Error: incorrect method, please use POST')
 
         # Process payload
         body_unicode = request.body.decode('utf-8')
@@ -35,6 +35,33 @@ def add_info(request):
 
         return HttpResponse('Success: added record to database')
 
+@csrf_exempt
+def db_query(request):
+    # If wrong method used, send back 400 error
+    if request.method != 'GET':
+        return HttpResponseBadRequest('Error: incorrect method, please use GET')
+
+    # Serialize db info into python
+    object_list = serializers.serialize('python', event.objects.all())
+
+    # Create object and add items from db into it
+    res={}
+    for object in object_list:
+        temp={}
+        for field_name, field_value in object['fields'].items():
+            if isinstance(field_value, datetime.date):
+                date = field_value
+                date = date.strftime('%m:%d:%Y')
+                temp[field_name]=date
+            else:
+                temp[field_name]=field_value
+        res[object['fields']['session_id']]=temp
+
+    # Make res object into json and return
+    res = json.dumps(res)
+    return HttpResponse(res)
+
+    
 
 def payloadChecker(payload):
     # Payload information checks
@@ -58,4 +85,3 @@ def payloadChecker(payload):
         return HttpResponseBadRequest('Error: Wrong value type for timestamp')
 
     return False
-

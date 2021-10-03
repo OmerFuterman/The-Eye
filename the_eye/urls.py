@@ -19,5 +19,6 @@ from info_processor import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('info_api/', views.add_info),
+    path('info_api/', views.add_info), # To add to database
+    path('query/', views.db_query),    # To query database
 ]
